@@ -1,5 +1,5 @@
 # label_layout
-This is a single html file that lets you layout labels for a print onto bought label stickers.
+This is a single html file that lets you layout labels for a print on to bought label stickers.
 
 If you are too lazy to download this just open it up directly: https://cdn.rawgit.com/moritzmair/label_layout/20c3b374/labels.html
 
