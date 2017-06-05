@@ -22,8 +22,8 @@
           }
         }
         //set new with and heights:
-        $('.page > div').css('width',100/rows+'%');
-        $('.page > div').css('height',100/cols+'%');
+        $('.page > div').css('width',100/cols+'%');
+        $('.page > div').css('height',100/rows+'%');
       }
 
       function CSVtoArray(text) {
@@ -52,20 +52,72 @@
 
           var pieces = CSVtoArray(text);
           console.log(pieces);
-          $('.page > div').each(function(index){
-            $(this).text(pieces[index]);
+          $('.page > div textarea').each(function(index){
+            $(this).val(pieces[index]);
           });
         };
         reader.readAsText(input.files[0]);
       }
 
       function clear_all(){
-        $('.page > div').each(function(index){
-          $(this).text("");
+        $('.page > div textarea').each(function(index){
+          $(this).val("");
         });
       }
 
+      function download_csv(){
+        var elements = [];
+        var csv_array = [];
 
+        $('.page > div').each(function(index){
+          elements.push($(this).find('textarea').val());
+        });
+
+        csv_array[0] = elements;
+
+        exportToCsv("label_layout.csv", csv_array);
+      }
+
+      function exportToCsv(filename, rows) {
+        var processRow = function (row) {
+          var finalVal = '';
+          for (var j = 0; j < row.length; j++) {
+            var innerValue = row[j] === null ? '' : row[j].toString();
+            if (row[j] instanceof Date) {
+              innerValue = row[j].toLocaleString();
+            };
+            var result = innerValue.replace(/"/g, '""');
+            if (result.search(/("|,|\n)/g) >= 0)
+              result = '"' + result + '"';
+            if (j > 0)
+              finalVal += ',';
+            finalVal += result;
+          }
+          return finalVal + '\n';
+        };
+
+        var csvFile = '';
+        for (var i = 0; i < rows.length; i++) {
+          csvFile += processRow(rows[i]);
+        }
+
+        var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+          navigator.msSaveBlob(blob, filename);
+        } else {
+          var link = document.createElement("a");
+          if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      }
 
     </script>
 
@@ -101,7 +153,7 @@
         height: 14.28571428571429%;
         width: 33.33333333%;
         font-size: 14px;
-        padding: 1%;
+        padding: 2mm;
         line-height: 1.2em;
         float: left;
         white-space:pre;
@@ -130,6 +182,19 @@
         border: 1px solid #777 !important;
       }
 
+      textarea {
+        border: none;
+        width: 100%;
+        height: 100%;
+        resize: none;
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        overflow: hidden;
+        font-family: Arial;
+      }
+
       @media print {
         .options {
           display: none;
@@ -139,16 +204,18 @@
   </head>
   <body class="border">
     <div class="options">
-      <label>Rows</label><input min="1" class="rows" value="3" type="number" oninput="add_divs()">
-      <label>Colums</label><input min="1" class="cols" value="7" type="number" oninput="add_divs()">
+      <label>Colums</label><input min="1" class="cols" value="3" type="number" oninput="add_divs()">
+      <label>Rows</label><input min="1" class="rows" value="7" type="number" oninput="add_divs()">
       Page margins: (in mm)<br>
       <label>Top</label><input oninput="$('.page').css('top',$(this).val()+'mm')" value="10" type="number">
       <label>Right</label><input oninput="$('.page').css('right',$(this).val()+'mm')" value="10" type="number">
       <label>Bottom</label><input oninput="$('.page').css('bottom',$(this).val()+'mm')" value="10" type="number">
       <label>Left</label><input oninput="$('.page').css('left',$(this).val()+'mm')" value="10" type="number">
       <label>Toggle borders</label><input checked type="checkbox" onclick="$('.page > div').toggleClass('border');$('body').toggleClass('border');">
+      <label>Padding</label><input oninput="$('.border').css('padding',$(this).val()+'mm')" value="2" type="number">
       <label>Upload csv</label><input type="file" accept="csv/plain" onchange="open_file(event)">
-      <br><br><input value="clear all" type="submit" onclick="clear_all();">
+      <br><br><input style="width:100%" value="Download csv" type="submit" onclick="download_csv();">
+      <br><br><input style="width:100%" value="Clear all" type="submit" onclick="clear_all();">
       <br><small>Papersize is Din A4</small>
       <br><br><small>by moritzmair.de 2017</small>
       <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
@@ -159,33 +226,33 @@
       </form>
     </div>
     <div class="page">
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
 
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
-      <div class="border" contenteditable="true"></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
+      <div class="border"><textarea></textarea></div>
     </div>
   </body>
 </html>
